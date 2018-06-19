@@ -4,7 +4,7 @@ GOCMD=GOPATH=`pwd` go
 
 .PHONY: all setup test coverage example
 
-all:	setup test
+all: test
 
 setup:
 	mkdir -p src/$(PROJECT)
