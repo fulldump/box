@@ -101,11 +101,11 @@ func (r *R) resourceParts(parts []string) *R {
 // Resource defines a new resource below current resource
 func (r *R) Resource(locator string) *R {
 
-	locator = strings.TrimPrefix(locator, "/")
 	if locator == "" {
 		return r
 	}
 
+	locator = strings.TrimPrefix(locator, "/")
 	parts := strings.Split(locator, "/")
 
 	return r.resourceParts(parts)

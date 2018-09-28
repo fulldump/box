@@ -36,7 +36,7 @@ func TestR_Resource_BaseCaseSlash(t *testing.T) {
 	root := NewResource()
 	r := root.Resource("/")
 
-	AssertEqual(t, r, root)
+	AssertEqual(t, r, root.children[0])
 }
 
 func TestR_Resource_NextCase(t *testing.T) {
