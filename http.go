@@ -63,7 +63,7 @@ func Box2Http(b *B) http.Handler {
 
 			switch h := c.Action.handler.(type) {
 			case func(http.ResponseWriter, *http.Request):
-				h(w, r)
+				h(c.Response, r)
 
 			case func(context.Context):
 				h(ctx)
@@ -78,7 +78,7 @@ func Box2Http(b *B) http.Handler {
 
 				objects := map[reflect.Type]interface{}{}
 				objects[reflect.TypeOf(ctx).Elem()] = ctx
-				objects[reflect.TypeOf(w).Elem()] = w
+				objects[reflect.TypeOf(w).Elem()] = c.Response
 				objects[reflect.TypeOf(r)] = r
 
 				bodies := []interface{}{}
@@ -148,7 +148,7 @@ func Box2Http(b *B) http.Handler {
 					return
 				}
 
-				err := serialize(ctx, w, genericResponse)
+				err := serialize(ctx, c.Response, genericResponse)
 				if nil != err {
 					// TODO: log serializer error
 				}
