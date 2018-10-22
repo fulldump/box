@@ -26,6 +26,16 @@ func Action(handler interface{}) *A {
 	}
 }
 
+func ActionPost(handler interface{}) *A {
+
+	return &A{
+		HttpMethod:   "POST",
+		Attr:         Attr{},
+		handler:      handler,
+		interceptors: []I{},
+	}
+}
+
 func actionBound(handler interface{}, method string) *A {
 	a := Action(handler)
 	a.bound = true
