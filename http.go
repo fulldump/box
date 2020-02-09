@@ -172,9 +172,7 @@ func unserialize(c context.Context, r io.Reader, v interface{}) error {
 
 // TODO: put this into box
 func serialize(c context.Context, w io.Writer, v interface{}) error {
-	e := json.NewEncoder(w)
-	e.SetIndent("", "    ")
-	return e.Encode(v)
+	return json.NewEncoder(w).Encode(v)
 }
 
 func isNil(a interface{}) bool {
