@@ -1,12 +1,13 @@
 package boxutil
 
 import (
-	"box"
 	"fmt"
 	"reflect"
 	"runtime"
 	"sort"
 	"strings"
+
+	"github.com/fulldump/box"
 )
 
 // Tree return a string representation of resources hierarchy
