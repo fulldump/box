@@ -7,11 +7,17 @@ type A struct {
 	Attr
 	HttpMethod string
 
-	name         string
-	bound        bool
-	resource     *R
-	handler      interface{}
-	interceptors []I
+	// Name is the name to identify the action AND the invocation to url suffix
+	Name string
+
+	// Bound is true if this action is not an extended action
+	Bound bool
+
+	// Interceptors is the list of actions that will be executed before executing handler
+	Interceptors []I
+
+	resource *R
+	handler  interface{}
 }
 
 func Action(handler interface{}) *A {
@@ -22,7 +28,7 @@ func Action(handler interface{}) *A {
 		HttpMethod:   "GET",
 		Attr:         Attr{},
 		handler:      handler,
-		interceptors: []I{},
+		Interceptors: []I{},
 	}
 }
 
@@ -32,13 +38,13 @@ func ActionPost(handler interface{}) *A {
 		HttpMethod:   "POST",
 		Attr:         Attr{},
 		handler:      handler,
-		interceptors: []I{},
+		Interceptors: []I{},
 	}
 }
 
 func actionBound(handler interface{}, method string) *A {
 	a := Action(handler)
-	a.bound = true
+	a.Bound = true
 	a.HttpMethod = method
 	return a
 }
@@ -74,13 +80,13 @@ func Trace(handler interface{}) *A {
 
 // WithName overwrite default action name
 func (a *A) WithName(name string) *A {
-	a.name = name
+	a.Name = name
 	return a
 }
 
 func (a *A) Bind(method string) *A {
 	a.HttpMethod = method
-	a.bound = true
+	a.Bound = true
 	return a
 }
 
@@ -92,7 +98,7 @@ func (a *A) WithAttribute(key string, value interface{}) *A {
 func (a *A) WithInterceptors(interceptor ...I) *A {
 
 	for _, i := range interceptor {
-		a.interceptors = append(a.interceptors, i)
+		a.Interceptors = append(a.Interceptors, i)
 	}
 
 	return a
