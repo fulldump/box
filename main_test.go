@@ -23,7 +23,7 @@ func BenchmarkList(b *testing.B) {
 		//last = P + strconv.Itoa(rand.Intn(N))
 
 		for _, v := range l {
-			if last == v.name {
+			if last == v.Name {
 				//fmt.Println(v)
 				break
 			}

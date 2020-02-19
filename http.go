@@ -53,11 +53,11 @@ func Box2Http(b *B) http.Handler {
 				if nil == ri {
 					break
 				}
-				interceptors = append(ri.interceptors, interceptors...)
-				ri = ri.parent
+				interceptors = append(ri.Interceptors, interceptors...)
+				ri = ri.Parent
 			}
 		}
-		interceptors = append(interceptors, c.Action.interceptors...)
+		interceptors = append(interceptors, c.Action.Interceptors...)
 
 		hi := func(ctx context.Context) {
 

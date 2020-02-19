@@ -19,8 +19,8 @@ func TestR_ResourceParts_NextCase(t *testing.T) {
 	a := root.resourceParts([]string{"a"})
 	b := root.resourceParts([]string{"a", "b"})
 
-	AssertEqual(t, a.parent, root)
-	AssertEqual(t, b.parent, a)
+	AssertEqual(t, a.Parent, root)
+	AssertEqual(t, b.Parent, a)
 }
 
 func TestR_Resource_BaseCase(t *testing.T) {
@@ -36,7 +36,7 @@ func TestR_Resource_BaseCaseSlash(t *testing.T) {
 	root := NewResource()
 	r := root.Resource("/")
 
-	AssertEqual(t, r, root.children[0])
+	AssertEqual(t, r, root.Children[0])
 }
 
 func TestR_Resource_NextCase(t *testing.T) {
@@ -46,8 +46,8 @@ func TestR_Resource_NextCase(t *testing.T) {
 	a := root.Resource("/a")
 	b := root.Resource("/a/b")
 
-	AssertEqual(t, a.parent, root)
-	AssertEqual(t, b.parent, a)
+	AssertEqual(t, a.Parent, root)
+	AssertEqual(t, b.Parent, a)
 }
 
 func TestR_Match(t *testing.T) {

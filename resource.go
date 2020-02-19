@@ -11,28 +11,34 @@ import (
 type R struct {
 	Attr
 
-	path     string
-	parent   *R
-	children []*R
+	// Path is a literal or placehoder that matches with a portion of the path
+	Path string
+
+	// Parent is a reference to parent resource
+	Parent *R
+
+	// Children is the list of desdendent resources
+	Children []*R
+
+	// Interceptors is the list of actions that will be executed before each
+	// action or resource under this resource
+	Interceptors []I
 
 	// actions contains all actions (bound and unbound)
 	actionsByName map[string]*A
 
 	// bound contains only bound actions
 	actionsByHttp map[string]*A
-
-	// interceptors ...
-	interceptors []I
 }
 
 func NewResource() *R {
 	return &R{
 		Attr:          Attr{},
-		path:          "",
-		children:      []*R{},
+		Path:          "",
+		Children:      []*R{},
 		actionsByName: map[string]*A{},
 		actionsByHttp: map[string]*A{},
-		interceptors:  []I{},
+		Interceptors:  []I{},
 	}
 }
 
@@ -47,15 +53,15 @@ func (r *R) Match(path string, parameters map[string]string) (result *R) {
 		return
 	}
 
-	if strings.HasPrefix(r.path, "{") && strings.HasSuffix(r.path, "}") {
+	if strings.HasPrefix(r.Path, "{") && strings.HasSuffix(r.Path, "}") {
 		// Match with pattern
-		parameter := r.path
+		parameter := r.Path
 		parameter = strings.TrimPrefix(parameter, "{")
 		parameter = strings.TrimSuffix(parameter, "}")
 		parameters[parameter] = current
-	} else if r.path == current {
+	} else if r.Path == current {
 		// Exact match
-	} else if r.path == "*" {
+	} else if r.Path == "*" {
 		// Delegation match
 		parameters["*"] = path
 		return r
@@ -68,7 +74,7 @@ func (r *R) Match(path string, parameters map[string]string) (result *R) {
 		return r
 	}
 
-	for _, c := range r.children {
+	for _, c := range r.Children {
 		if result := c.Match(parts[1], parameters); nil != result {
 			return result
 		}
@@ -84,16 +90,16 @@ func (r *R) resourceParts(parts []string) *R {
 	}
 
 	part := parts[0]
-	for _, child := range r.children {
-		if child.path == part {
+	for _, child := range r.Children {
+		if child.Path == part {
 			return child.resourceParts(parts[1:])
 		}
 	}
 
 	child := NewResource()
-	child.path = part
-	child.parent = r
-	r.children = append(r.children, child)
+	child.Path = part
+	child.Parent = r
+	r.Children = append(r.Children, child)
 
 	return child.resourceParts(parts[1:])
 }
@@ -115,16 +121,16 @@ func (r *R) Resource(locator string) *R {
 func (r *R) WithActions(action ...*A) *R {
 
 	for _, a := range action {
-		if "" == a.name {
-			a.name = getFunctionName(a.handler)
-			a.name = actionNameNormalizer(a.name)
+		if "" == a.Name {
+			a.Name = getFunctionName(a.handler)
+			a.Name = actionNameNormalizer(a.Name)
 		}
 		a.resource = r
-		r.actionsByName[a.name] = a
+		r.actionsByName[a.Name] = a
 
 		h := a.HttpMethod + " "
-		if !a.bound {
-			h += a.name
+		if !a.Bound {
+			h += a.Name
 		}
 		r.actionsByHttp[h] = a
 	}
@@ -132,11 +138,22 @@ func (r *R) WithActions(action ...*A) *R {
 	return r
 }
 
+// GetActions retrieve the slice of actions defined in this resource
+func (r *R) GetActions() []*A {
+
+	var actions []*A
+	for _, a := range r.actionsByName {
+		actions = append(actions, a)
+	}
+
+	return actions
+}
+
 // Add interceptor to this resource
 func (r *R) WithInterceptors(interceptor ...I) *R {
 
 	for _, i := range interceptor {
-		r.interceptors = append(r.interceptors, i)
+		r.Interceptors = append(r.Interceptors, i)
 	}
 
 	return r
