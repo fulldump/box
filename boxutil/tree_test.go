@@ -1,10 +1,11 @@
 package boxutil
 
 import (
-	. "box"
 	"context"
 	"fmt"
 	"testing"
+
+	. "github.com/fulldump/box"
 )
 
 func TestTree(t *testing.T) {
