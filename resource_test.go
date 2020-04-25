@@ -50,6 +50,18 @@ func TestR_Resource_NextCase(t *testing.T) {
 	AssertEqual(t, b.Parent, a)
 }
 
+func TestR_Match_DecodeUriComponent(t *testing.T) {
+
+	r := NewResource()
+	r.Resource("/users/{userId}/history")
+
+	parameters := map[string]string{}
+
+	r.Match("/users/a+b%20c/history", parameters)
+
+	AssertEqual(t, parameters["userId"], "a b c")
+}
+
 func TestR_Match(t *testing.T) {
 
 	r := NewResource()
