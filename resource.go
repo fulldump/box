@@ -47,7 +47,7 @@ func (r *R) Match(path string, parameters map[string]string) (result *R) {
 
 	parts := strings.SplitN(path, "/", 2)
 
-	current, err := url.PathUnescape(parts[0])
+	current, err := url.QueryUnescape(parts[0])
 	if nil != err {
 		// TODO: maybe log debug "unescape" error ??
 		return
