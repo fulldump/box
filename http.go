@@ -27,12 +27,12 @@ func Box2Http(b *B) http.Handler {
 		ctx = setBoxContext(ctx, c)
 
 		// Split url action
-		urlResource, urlAction := splitAction(r.URL.Path)
+		urlResource, urlAction := splitAction(r.URL.RawPath)
 
 		// Match resource
 		c.Resource = b.Match(urlResource, c.Parameters)
 		if nil == c.Resource {
-			err := errors.New("RESOURCE " + r.URL.Path + " NOT FOUND!!!")
+			err := errors.New("RESOURCE " + r.URL.RawPath + " NOT FOUND!!!")
 			SetError(ctx, err)
 			return
 		}
