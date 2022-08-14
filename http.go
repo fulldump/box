@@ -40,6 +40,9 @@ func Box2Http(b *B) http.Handler {
 		// Match action
 		c.Action = c.Resource.actionsByHttp[r.Method+" "+urlAction]
 		if nil == c.Action {
+			c.Action = c.Resource.actionsByHttp[HttpMethodAny+" "]
+		}
+		if nil == c.Action {
 			err := errors.New("Action " + urlAction + " not found!!")
 			SetError(ctx, err)
 			return

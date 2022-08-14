@@ -86,3 +86,30 @@ func TestNewBox_EscapedUrlPath(t *testing.T) {
 	}
 
 }
+
+func TestNewBox_MethodAny(t *testing.T) {
+
+	b := NewBox()
+
+	b.Resource("/say-hello").
+		WithActions(
+			Post(func() string {
+				return "Hello World"
+			}),
+			AnyMethod(func() string {
+				return "Any"
+			}),
+		)
+
+	h := Box2Http(b)
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/say-hello", nil)
+	h.ServeHTTP(w, r)
+
+	body, _ := ioutil.ReadAll(w.Body)
+	if `"Any"`+"\n" != string(body) {
+		t.Error("Body does not match")
+	}
+
+}
