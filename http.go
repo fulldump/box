@@ -24,7 +24,7 @@ func Box2Http(b *B) http.Handler {
 			Request:    r,
 			Response:   w,
 		}
-		ctx = setBoxContext(ctx, c)
+		ctx = SetBoxContext(ctx, c)
 
 		// Split url action
 		urlResource, urlAction := splitAction(r.URL.EscapedPath())

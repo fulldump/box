@@ -69,7 +69,7 @@ func main() {
 
 	b.Resource("/users/{userId}/history").
 		WithActions(
-			Get(GetHistory),
+			Get(GetUserHistory),
 			Post(CreateHistory),
 			Action(RevertHistory),
 		)
@@ -82,9 +82,10 @@ func CreateHistory(input string) {
 	//	fmt.Println("input:", input)
 }
 
-func GetHistory(w http.ResponseWriter) string {
+func GetUserHistory(ctx context.Context, w http.ResponseWriter) string {
 	w.WriteHeader(555)
-	return "Heyyy this is the history"
+	userId := GetUrlParameter(ctx, "userId")
+	return "Heyyy this is the history for userId " + userId
 }
 
 func RevertHistory() {

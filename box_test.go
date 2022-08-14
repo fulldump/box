@@ -68,7 +68,7 @@ func TestNewBox_EscapedUrlPath(t *testing.T) {
 	b.Resource("/{value}/hello").
 		WithActions(
 			Get(func(ctx context.Context) {
-				value := getBoxContext(ctx).Parameters["value"]
+				value := GetUrlParameter(ctx, "value")
 				_, _ = fmt.Fprintf(GetResponse(ctx), "Hello '%s'", value)
 			}),
 		)
