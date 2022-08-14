@@ -1,10 +1,11 @@
 package main
 
 import (
-	. "box"
 	"context"
 	"fmt"
 	"net/http"
+
+	. "github.com/fulldump/box"
 )
 
 func main() {
@@ -73,7 +74,7 @@ func main() {
 			Action(RevertHistory),
 		)
 
-	b.Serve()
+	b.ListenAndServe()
 }
 
 func CreateHistory(input string) {

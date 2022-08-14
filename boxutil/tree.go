@@ -94,5 +94,5 @@ func getFunctionName(i interface{}) string {
 
 	parts := strings.Split(name, ".")
 
-	return parts[1]
+	return parts[len(parts)-1]
 }
