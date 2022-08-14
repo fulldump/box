@@ -113,3 +113,57 @@ func TestNewBox_MethodAny(t *testing.T) {
 	}
 
 }
+
+func TestNewBox_ErrResourceNotFound(t *testing.T) {
+
+	b := NewBox()
+
+	b.WithInterceptors(
+		func(next H) H {
+			return func(ctx context.Context) {
+				next(ctx)
+				err := GetError(ctx)
+				if err != ErrResourceNotFound {
+					t.Error("Err should be ErrResourceNotFound")
+				}
+			}
+		},
+	)
+
+	b.Resource("/hello").
+		WithActions(Get(func() string {
+			return "hello"
+		}))
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/invented", nil)
+	b.ServeHTTP(w, r)
+
+}
+
+func TestNewBox_ErrMethodNotAllowed(t *testing.T) {
+
+	b := NewBox()
+
+	b.WithInterceptors(
+		func(next H) H {
+			return func(ctx context.Context) {
+				next(ctx)
+				err := GetError(ctx)
+				if err != ErrMethodNotAllowed {
+					t.Error("Err should be ErrMethodNotAllowed")
+				}
+			}
+		},
+	)
+
+	b.Resource("/hello").
+		WithActions(Get(func() string {
+			return "hello"
+		}))
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("POST", "/hello", nil)
+	b.ServeHTTP(w, r)
+
+}

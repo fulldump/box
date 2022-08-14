@@ -12,6 +12,15 @@ import (
 	"strings"
 )
 
+var (
+	ErrResourceNotFound = errors.New("resource_not_found")
+	ErrMethodNotAllowed = errors.New("method_not_allowed")
+)
+
+func handlerDoNothing(w http.ResponseWriter, r *http.Request) {
+	// do nothing
+}
+
 func Box2Http(b *B) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -26,32 +35,39 @@ func Box2Http(b *B) http.Handler {
 		}
 		ctx = SetBoxContext(ctx, c)
 
+		var handler interface{} = handlerDoNothing
+
 		// Split url action
 		urlResource, urlAction := splitAction(r.URL.EscapedPath())
 
 		// Match resource
 		c.Resource = b.Match(urlResource, c.Parameters)
 		if nil == c.Resource {
-			err := errors.New("RESOURCE " + r.URL.EscapedPath() + " NOT FOUND!!!")
-			SetError(ctx, err)
-			return
+			SetError(ctx, ErrResourceNotFound)
+			//return
 		}
 
 		// Match action
-		c.Action = c.Resource.actionsByHttp[r.Method+" "+urlAction]
-		if nil == c.Action {
-			c.Action = c.Resource.actionsByHttp[HttpMethodAny+" "]
-		}
-		if nil == c.Action {
-			err := errors.New("Action " + urlAction + " not found!!")
-			SetError(ctx, err)
-			return
+		if c.Resource != nil {
+			c.Action = c.Resource.actionsByHttp[r.Method+" "+urlAction]
+			if nil == c.Action {
+				c.Action = c.Resource.actionsByHttp[HttpMethodAny+" "]
+			}
+			if nil == c.Action {
+				SetError(ctx, ErrMethodNotAllowed)
+				//return
+			} else {
+				handler = c.Action.handler
+			}
 		}
 
 		// Interceptors
 		interceptors := []I{}
 		{
 			ri := c.Resource
+			if ri == nil {
+				ri = b.R
+			}
 			for {
 				if nil == ri {
 					break
@@ -60,11 +76,13 @@ func Box2Http(b *B) http.Handler {
 				ri = ri.Parent
 			}
 		}
-		interceptors = append(interceptors, c.Action.Interceptors...)
+		if c.Action != nil {
+			interceptors = append(interceptors, c.Action.Interceptors...)
+		}
 
 		hi := func(ctx context.Context) {
 
-			switch h := c.Action.handler.(type) {
+			switch h := handler.(type) {
 			case func(http.ResponseWriter, *http.Request):
 				h(c.Response, r)
 
