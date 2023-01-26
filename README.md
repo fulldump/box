@@ -31,50 +31,31 @@ func main() {
 }
 ```
 
-## Getting started
-
-```go
-package main
-
-import (
-	"github.com/fulldump/box"
-)
-
-func main() {
-	
-	b := box.NewBox()
-	b.HandleFunc("GET", "/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("World!"))
-	})
-	b.ListenAndServe() // listening at http://localhost:8080
-
-}
-```
-
 ## Sending JSON
 
 ```go
-package main
-
-import (
-	"github.com/fulldump/box"
-)
+b := box.NewBox()
 
 type MyResponse struct {
 	Name string
 	Age  int
 }
 
-func main() {
+b.Handle("GET", "/hello", func(w http.ResponseWriter, r *http.Request) MyResponse {
+    return MyResponse{
+        Name: "Fulanez",
+        Age:  33,
+    }
+})
+```
 
-	b := box.NewBox()
-	b.Handle("GET", "/hello", func(w http.ResponseWriter, r *http.Request) MyResponse {
-		return MyResponse{
-			Name: "Fulanez",
-			Age:  33,
-		}
-	})
-	b.ListenAndServe()
+## URL parameters
 
-}
+```go
+b := box.NewBox()
+
+b.Handle("GET", "/articles/{article-id}", func(w http.ResponseWriter, r *http.Request) string {
+    articleID := box.Param(r, "article-id")
+    return "ArticleID is " + articleID
+})
 ```
