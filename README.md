@@ -1,4 +1,5 @@
 # Box
+<img src="logo.png">
 
 <p align="center">
 <a href="https://app.travis-ci.com/fulldump/box" rel="nofollow"><img src="https://app.travis-ci.com/fulldump/box.svg?branch=master" alt="Build Status"></a>
