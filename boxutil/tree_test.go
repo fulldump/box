@@ -5,31 +5,31 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/fulldump/box"
+	"github.com/fulldump/box"
 )
 
 func TestTree(t *testing.T) {
 
-	root := NewResource()
+	root := box.NewResource()
 	v1 := root.Resource("/api/v1").
 		WithInterceptors(Auth, AccessLog)
 	v1.Resource("/users").
 		WithActions(
-			Get(ListUsers).WithInterceptors(AdminRequired, NoAudit),
-			Post(CreateUser).WithInterceptors(AdminRequired),
+			box.Get(ListUsers).WithInterceptors(AdminRequired, NoAudit),
+			box.Post(CreateUser).WithInterceptors(AdminRequired),
 		)
 	v1.Resource("/users/{userId}").
 		WithActions(
-			Get(GetUser),
-			Delete(DeleteUser),
-			ActionPost(BanUser).WithInterceptors(AdminRequired),
-			ActionPost(EnableUser).WithInterceptors(AdminRequired),
-			ActionPost(DisableUser).WithInterceptors(AdminRequired),
+			box.Get(GetUser),
+			box.Delete(DeleteUser),
+			box.ActionPost(BanUser).WithInterceptors(AdminRequired),
+			box.ActionPost(EnableUser).WithInterceptors(AdminRequired),
+			box.ActionPost(DisableUser).WithInterceptors(AdminRequired),
 		)
 	v1.Resource("/spots/{spotId}/menus/{menuId}").
 		WithActions(
-			Delete(DeleteMenu).WithInterceptors(AdminRequired, NoAudit),
-			Patch(UpdateMenu),
+			box.Delete(DeleteMenu).WithInterceptors(AdminRequired, NoAudit),
+			box.Patch(UpdateMenu),
 		)
 
 	s := Tree(root)
@@ -67,24 +67,25 @@ func ListUsers()   {}
 func DeleteMenu()  {}
 func UpdateMenu()  {}
 
-func Auth(next H) H {
-	return func(ctx context.Context) {
-		next(ctx)
-	}
-}
-func AccessLog(next H) H {
+func Auth(next box.H) box.H {
 	return func(ctx context.Context) {
 		next(ctx)
 	}
 }
 
-func AdminRequired(next H) H {
+func AccessLog(next box.H) box.H {
 	return func(ctx context.Context) {
 		next(ctx)
 	}
 }
 
-func NoAudit(next H) H {
+func AdminRequired(next box.H) box.H {
+	return func(ctx context.Context) {
+		next(ctx)
+	}
+}
+
+func NoAudit(next box.H) box.H {
 	return func(ctx context.Context) {
 		next(ctx)
 	}
@@ -92,7 +93,7 @@ func NoAudit(next H) H {
 
 func TestSortActions(t *testing.T) {
 
-	actions := []*A{
+	actions := []*box.A{
 		{Name: "D", Bound: false},
 		{Name: "C", Bound: false},
 		{Name: "B", Bound: true, HttpMethod: "B"},

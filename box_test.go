@@ -38,7 +38,7 @@ func TestNewBox_PrintError(t *testing.T) {
 
 	b := NewBox()
 
-	b.WithInterceptors(InterceptorPrintError)
+	b.WithInterceptors(PrettyError)
 
 	b.Resource("/say-error").
 		WithActions(
