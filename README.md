@@ -59,3 +59,31 @@ b.Handle("GET", "/articles/{article-id}", func(w http.ResponseWriter, r *http.Re
     return "ArticleID is " + articleID
 })
 ```
+
+## Receiving and sending JSON
+
+```go
+type CreateArticleRequest struct {
+	Title string
+	Text  string
+}
+
+type Article struct {
+	Id      string    `json:"id"`
+	Title   string    `json:"title"`
+	Text    string    `json:"text"`
+	Created time.Time `json:"created"`
+}
+
+b := box.NewBox()
+b.Handle("POST", "/articles", func(input CreateArticleRequest) Article {
+    fmt.Println("Persist new article...", input)
+    return Article{
+        Id:      "my-new-id",
+        Title:   input.Title,
+        Text:    input.Text,
+        Created: time.Unix(1674762079, 0),
+    }
+})
+```
+
