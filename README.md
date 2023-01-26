@@ -1,5 +1,9 @@
 # Box
 
+[![Build Status](https://app.travis-ci.com/fulldump/box.svg?branch=master)](https://app.travis-ci.com/fulldump/box)
+
+Box is an HTTP router to speed up development. Box supports URL parameters, interceptors, magic handlers
+and introspection documentation.
 
 ## Getting started
 
