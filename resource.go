@@ -1,6 +1,7 @@
 package box
 
 import (
+	"net/http"
 	"net/url"
 	"reflect"
 	"runtime"
@@ -162,6 +163,18 @@ func (r *R) WithInterceptors(interceptor ...I) *R {
 func (r *R) WithAttribute(key string, value interface{}) *R {
 	r.SetAttribute(key, value)
 	return r
+}
+
+func (r *R) HandleFunc(method string, path string, handler func(w http.ResponseWriter, r *http.Request)) {
+	r.Resource(path).WithActions(
+		actionBound(handler, method),
+	)
+}
+
+func (r *R) Handle(method string, path string, handler interface{}) {
+	r.Resource(path).WithActions(
+		actionBound(handler, method),
+	)
 }
 
 func actionNameNormalizer(u string) string {
