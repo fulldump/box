@@ -12,13 +12,13 @@ import (
 type R struct {
 	Attr
 
-	// Path is a literal or placehoder that matches with a portion of the path
+	// Path is a literal or placeholder that matches with a portion of the path
 	Path string
 
 	// Parent is a reference to parent resource
 	Parent *R
 
-	// Children is the list of desdendent resources
+	// Children is the list of descendent resources
 	Children []*R
 
 	// Interceptors is the list of actions that will be executed before each

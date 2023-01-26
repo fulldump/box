@@ -1,4 +1,4 @@
-package main
+package box_test
 
 import (
 	"io"
