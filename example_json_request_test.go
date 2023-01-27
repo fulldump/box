@@ -33,7 +33,7 @@ func Example_Json_request() {
 			Id:      "my-new-id",
 			Title:   input.Title,
 			Text:    input.Text,
-			Created: time.Unix(1674762079, 0),
+			Created: time.Unix(1674762079, 0).UTC(),
 		}
 	})
 	s := httptest.NewServer(b)
