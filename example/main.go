@@ -5,89 +5,78 @@ import (
 	"fmt"
 	"net/http"
 
-	. "github.com/fulldump/box"
+	"github.com/fulldump/box"
+	"github.com/fulldump/box/boxutil"
 )
 
 func main() {
 
-	b := NewBox()
+	b := box.NewBox()
 
-	b.WithInterceptors(
-		func(next H) H {
-			return func(ctx context.Context) {
-				fmt.Println("A[")
-				next(ctx)
-				fmt.Println("]A")
-			}
-		},
-		func(next H) H {
-			return func(ctx context.Context) {
-				fmt.Println("  B[")
-				next(ctx)
-				fmt.Println("  ]B")
-			}
-		},
+	b.Use(
+		box.AccessLog,
+		box.RecoverFromPanic,
 	)
 
-	b.Resource("/hello").
-		WithInterceptors(
-			func(next H) H {
-				return func(ctx context.Context) {
-					fmt.Println("    C[")
-					next(ctx)
-					fmt.Println("    ]C")
-				}
-			},
-			func(next H) H {
-				return func(ctx context.Context) {
-					fmt.Println("      D[")
-					next(ctx)
-					fmt.Println("      ]D")
-				}
-			},
-		).
-		WithActions(
-			Get(func() {
-				fmt.Println("hello")
-			}).WithInterceptors(
-				func(next H) H {
-					return func(ctx context.Context) {
-						fmt.Println("E[")
-						next(ctx)
-						fmt.Println("      ]E")
-					}
-				},
-				func(next H) H {
-					return func(ctx context.Context) {
-						fmt.Println("          F[")
-						next(ctx)
-						fmt.Println("          ]F")
-					}
-				},
-			),
-		)
+	orgs := b.Group("/orgs")
+	orgs.HandleFunc("GET", "/orgs/{org}/repos", ListOrganizationRepositories)
+	orgs.HandleFunc("POST", "/orgs/{org}/repos", CreateOrganizationRepository)
 
-	b.Resource("/users/{userId}/history").
-		WithActions(
-			Get(GetUserHistory),
-			Post(CreateHistory),
-			Action(RevertHistory),
-		)
+	repos := b.Group("/repos/{owner}/{repo}")
+	repos.HandleFunc("POST", "", GetRepository)
+	repos.HandleFunc("PATCH", "", UpdateRepository)
+	repos.HandleFunc("DELETE", "", DeleteRepository)
+	repos.HandleFunc("PUT", "/automated-security-fixes", EnableAutomatedSecurityFixes)
+	repos.HandleFunc("DELETE", "/automated-security-fixes", DisableAutomatedSecurityFixes)
+	repos.HandleFunc("GET", "/codeowners/errors", ListCodeownersErrors)
+	repos.HandleFunc("GET", "/contributors", ListRepositoryContributors)
+	repos.HandleFunc("GET", "/languages", ListRepositoryLanguages)
+	repos.HandleFunc("GET", "/tags", ListRepositoryTags)
+	repos.HandleFunc("GET", "/teams", ListRepositoryTeams)
+	repos.HandleFunc("GET", "/topics", ListRepositoryTopics)
+
+	b.HandleFunc("GET", "/repositories", ListPublicRepositories)
+	b.HandleFunc("GET", "/users/{username}/repos", ListRepositoriesForAUser)
+
+	user := b.Group("/user").Use(CheckAuthorization)
+	user.HandleFunc("GET", "/repos", ListRepositoriesForTheAuthenticatedUser)
+	user.HandleFunc("POST", "/repos", CreateRepositoryForTheAuthenticatedUser)
+
+	fmt.Println(boxutil.Tree(b.R))
 
 	b.ListenAndServe()
 }
 
-func CreateHistory(input string) {
-	fmt.Println("Create history!!", input)
-	//	fmt.Println("input:", input)
-}
+func ListRepositoryTopics(w http.ResponseWriter, r *http.Request)                               {}
+func ListRepositoryTeams(w http.ResponseWriter, r *http.Request)                                {}
+func ListRepositoryTags(w http.ResponseWriter, r *http.Request)                                 {}
+func ListRepositoryLanguages(w http.ResponseWriter, r *http.Request)                            {}
+func ListRepositoryContributors(w http.ResponseWriter, r *http.Request)                         {}
+func ListCodeownersErrors(w http.ResponseWriter, r *http.Request)                               {}
+func DisableAutomatedSecurityFixes(w http.ResponseWriter, r *http.Request)                      {}
+func EnableAutomatedSecurityFixes(w http.ResponseWriter, r *http.Request)                       {}
+func ListRepositoriesForAUser(w http.ResponseWriter, r *http.Request)                           {}
+func CreateRepositoryForTheAuthenticatedUser(w http.ResponseWriter, r *http.Request)            {}
+func ListRepositoriesForTheAuthenticatedUser(writer http.ResponseWriter, request *http.Request) {}
+func DeleteRepository(w http.ResponseWriter, r *http.Request)                                   {}
+func UpdateRepository(w http.ResponseWriter, r *http.Request)                                   {}
+func ListPublicRepositories(w http.ResponseWriter, r *http.Request)                             {}
+func CreateOrganizationRepository(w http.ResponseWriter, r *http.Request)                       {}
+func GetRepository(w http.ResponseWriter, r *http.Request)                                      {}
+func ListOrganizationRepositories(w http.ResponseWriter, r *http.Request)                       {}
 
-func GetUserHistory(ctx context.Context, w http.ResponseWriter) string {
-	w.WriteHeader(555)
-	userId := GetUrlParameter(ctx, "userId")
-	return "Heyyy this is the history for userId " + userId
-}
-
-func RevertHistory() {
-	fmt.Println("GET HISTORY HANDLER")
+func CheckAuthorization(next box.H) box.H {
+	return func(ctx context.Context) {
+		user, pass, ok := box.GetRequest(ctx).BasicAuth()
+		if !ok {
+			return
+		}
+		if user != "admin" {
+			return
+		}
+		if pass != "123456" {
+			return
+		}
+		next(ctx)
+	}
 }

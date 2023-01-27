@@ -5,6 +5,7 @@
 <a href="https://app.travis-ci.com/fulldump/box" rel="nofollow"><img src="https://app.travis-ci.com/fulldump/box.svg?branch=master" alt="Build Status"></a>
 <a href="https://goreportcard.com/report/github.com/fulldump/box"><img src="https://goreportcard.com/badge/github.com/fulldump/box"></a>
 <a href="https://godoc.org/github.com/fulldump/box"><img src="https://godoc.org/github.com/fulldump/box?status.svg" alt="GoDoc"></a>
+<img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/fulldump/box?sort=semver">
 </p>
 
 Box is an HTTP router to speed up development. Box supports URL parameters, interceptors, magic handlers
