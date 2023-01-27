@@ -48,5 +48,5 @@ func Example_Json_request() {
 
 	// Output:
 	// Persist new article... {My great article Blah blah blah...}
-	// {"id":"my-new-id","title":"My great article","text":"Blah blah blah...","created":"2023-01-26T20:41:19+01:00"}
+	// {"id":"my-new-id","title":"My great article","text":"Blah blah blah...","created":"2023-01-26T19:41:19Z"}
 }
