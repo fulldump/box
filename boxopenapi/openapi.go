@@ -11,7 +11,8 @@ import (
 
 type JSON = map[string]any
 
-func Spec(api *box.B) JSON {
+// Spec returns a valid OpenAPI spec from a box router ready to be used.
+func Spec(api *box.B) OpenAPI {
 
 	paths := JSON{}
 	schemas := JSON{}
@@ -77,19 +78,19 @@ func Spec(api *box.B) JSON {
 		paths[path] = methods
 	})
 
-	return JSON{
-		"openapi": "3.0.0",
-		"info": JSON{
-			"version": "1",
-			"title":   "config",
+	return OpenAPI{
+		Openapi: "3.1.0",
+		Info: Info{
+			Title:   "BoxOpenAPI",
+			Version: "1",
 		},
-		"servers": []JSON{
+		Servers: []Server{
 			{
-				"url": "https://config.hola.cloud",
+				Url: "http://localhost:8080",
 			},
 		},
-		"paths": paths,
-		"components": JSON{
+		Paths: paths,
+		Components: JSON{
 			"schemas": schemas,
 		},
 	}

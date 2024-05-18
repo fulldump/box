@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/fulldump/box"
+	"github.com/fulldump/box/boxopenapi"
 	"github.com/fulldump/box/boxutil"
 )
 
@@ -43,6 +44,18 @@ func main() {
 	user.HandleFunc("POST", "/repos", CreateRepositoryForTheAuthenticatedUser)
 
 	fmt.Println(boxutil.Tree(b.R))
+
+	spec := boxopenapi.Spec(b)
+	spec.Info.Title = "My service"
+	spec.Info.Version = "1.0"
+	spec.Servers = []boxopenapi.Server{
+		{
+			Url: "http://localhost:8080",
+		},
+	}
+	b.Handle("GET", "/openapi.json", func() any {
+		return spec
+	})
 
 	b.ListenAndServe()
 }

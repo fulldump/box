@@ -107,10 +107,10 @@ func TestOpenApi(t *testing.T) {
 			},
 		},
 		"info": JSON{
-			"title":   "config",
+			"title":   "BoxOpenAPI",
 			"version": "1",
 		},
-		"openapi": "3.0.0",
+		"openapi": "3.1.0",
 		"paths": JSON{
 			"/users": JSON{
 				"get": JSON{
@@ -188,7 +188,7 @@ func TestOpenApi(t *testing.T) {
 		},
 		"servers": []JSON{
 			{
-				"url": "https://config.hola.cloud",
+				"url": "http://localhost:8080",
 			},
 		},
 	}
