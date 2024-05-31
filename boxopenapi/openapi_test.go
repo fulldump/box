@@ -5,6 +5,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/fulldump/box"
 )
@@ -15,8 +16,11 @@ func newApiExample() *box.B {
 
 	b.Handle("GET", "/users", ListUsers)
 	b.Handle("POST", "/users", CreateUser)
-
 	b.Handle("GET", "/users/{userId}", GetUser)
+
+	b.Handle("GET", "/recursive", ListRecursiveObjects)
+	b.Handle("GET", "/scalarValues", GetScalarValues)
+	b.Handle("GET", "/time.Time", GetTypeTime)
 
 	return b
 }
@@ -31,6 +35,11 @@ type User struct {
 
 func ListUsers() []*User {
 	return nil
+}
+
+type RecursiveObject struct {
+	RecursiveObject *RecursiveObject   `description:"my recursive object"`
+	RecursiveList   []*RecursiveObject `description:"my recursive list"`
 }
 
 type CreateUserInput struct {
@@ -49,6 +58,39 @@ func GetUser() *User {
 	return nil
 }
 
+func ListRecursiveObjects() *RecursiveObject {
+	return nil
+}
+
+type ScalarsValues struct {
+	MyString  string  `description:"my String description"`
+	MyBool    bool    `description:"my Bool description"`
+	MyInt     int     `description:"my Int description"`
+	MyInt64   int64   `description:"my Int64 description"`
+	MyInt32   int32   `description:"my Int32 description"`
+	MyInt16   int16   `description:"my Int16 description"`
+	MyInt8    int8    `description:"my Int8 description"`
+	MyUint    uint    `description:"my Uint description"`
+	MyUint64  uint64  `description:"my Uint64 description"`
+	MyUint32  uint32  `description:"my Uint32 description"`
+	MyUint16  uint16  `description:"my Uint16 description"`
+	MyUint8   uint8   `description:"my Uint8 description"`
+	MyFloat64 float64 `description:"my Float64 description"`
+	MyFloat32 float32 `description:"my Float32 description"`
+}
+
+func GetScalarValues() *ScalarsValues {
+	return nil
+}
+
+type TypeTime struct {
+	Today time.Time `description:"the time for today :D"`
+}
+
+func GetTypeTime() *TypeTime {
+	return nil
+}
+
 // https://editor-next.swagger.io/
 func TestOpenApi(t *testing.T) {
 
@@ -59,8 +101,8 @@ func TestOpenApi(t *testing.T) {
 	e.SetIndent("", "    ")
 	e.Encode(result)
 
-	expected := JSON{
-		"components": JSON{
+	expected := OpenAPI{
+		Components: JSON{
 			"schemas": JSON{
 				"CreateUserInput": JSON{
 					"properties": JSON{
@@ -73,6 +115,99 @@ func TestOpenApi(t *testing.T) {
 						},
 					},
 					"required": []JSON{},
+					"type":     "object",
+				},
+				"RecursiveObject": JSON{
+					"properties": JSON{
+						"RecursiveList": JSON{
+							"description": "my recursive list",
+							"items": JSON{
+								"$ref": "#/components/schemas/RecursiveObject",
+							},
+							"type": "array",
+						},
+						"RecursiveObject": JSON{
+							"$ref":        "#/components/schemas/RecursiveObject",
+							"description": "my recursive object",
+						},
+					},
+					"required": []JSON{},
+					"type":     "object",
+				},
+				"ScalarsValues": JSON{
+					"properties": JSON{
+						"MyBool": JSON{
+							"description": "my Bool description",
+							"type":        "boolean",
+						},
+						"MyFloat32": JSON{
+							"description": "my Float32 description",
+							"type":        "number",
+						},
+						"MyFloat64": JSON{
+							"description": "my Float64 description",
+							"type":        "number",
+						},
+						"MyInt": JSON{
+							"description": "my Int description",
+							"type":        "number",
+						},
+						"MyInt16": JSON{
+							"description": "my Int16 description",
+							"type":        "number",
+						},
+						"MyInt32": JSON{
+							"description": "my Int32 description",
+							"type":        "number",
+						},
+						"MyInt64": JSON{
+							"description": "my Int64 description",
+							"type":        "number",
+						},
+						"MyInt8": JSON{
+							"description": "my Int8 description",
+							"type":        "number",
+						},
+						"MyString": JSON{
+							"description": "my String description",
+							"type":        "string",
+						},
+						"MyUint": JSON{
+							"description": "my Uint description",
+							"type":        "number",
+						},
+						"MyUint16": JSON{
+							"description": "my Uint16 description",
+							"type":        "number",
+						},
+						"MyUint32": JSON{
+							"description": "my Uint32 description",
+							"type":        "number",
+						},
+						"MyUint64": JSON{
+							"description": "my Uint64 description",
+							"type":        "number",
+						},
+						"MyUint8": JSON{
+							"description": "my Uint8 description",
+							"type":        "number",
+						},
+					},
+					"required": []JSON{},
+					"type":     "object",
+				},
+				"TypeTime": JSON{
+					"properties": JSON{
+						"Today": JSON{
+							"description": "the time for today :D",
+							"examples": []any{
+								"2006-01-02T15:04:05Z07:00",
+							},
+							"format": "date-time",
+							"type":   "string",
+						},
+					},
+					"required": []any{},
 					"type":     "object",
 				},
 				"User": JSON{
@@ -106,12 +241,63 @@ func TestOpenApi(t *testing.T) {
 				},
 			},
 		},
-		"info": JSON{
-			"title":   "BoxOpenAPI",
-			"version": "1",
+		Info: Info{
+			Title:   "BoxOpenAPI",
+			Version: "1",
 		},
-		"openapi": "3.1.0",
-		"paths": JSON{
+		Openapi: "3.1.0",
+		Paths: JSON{
+			"/recursive": JSON{
+				"get": JSON{
+					"operationId": "listRecursiveObjects",
+					"responses": JSON{
+						"default": JSON{
+							"content": JSON{
+								"application/json": JSON{
+									"schema": JSON{
+										"$ref": "#/components/schemas/RecursiveObject",
+									},
+								},
+							},
+							"description": "some human description",
+						},
+					},
+				},
+			},
+			"/scalarValues": JSON{
+				"get": JSON{
+					"operationId": "getScalarValues",
+					"responses": JSON{
+						"default": JSON{
+							"content": JSON{
+								"application/json": JSON{
+									"schema": JSON{
+										"$ref": "#/components/schemas/ScalarsValues",
+									},
+								},
+							},
+							"description": "some human description",
+						},
+					},
+				},
+			},
+			"/time.Time": JSON{
+				"get": JSON{
+					"operationId": "getTypeTime",
+					"responses": JSON{
+						"default": JSON{
+							"content": JSON{
+								"application/json": JSON{
+									"schema": JSON{
+										"$ref": "#/components/schemas/TypeTime",
+									},
+								},
+							},
+							"description": "some human description",
+						},
+					},
+				},
+			},
 			"/users": JSON{
 				"get": JSON{
 					"operationId": "listUsers",
@@ -186,9 +372,9 @@ func TestOpenApi(t *testing.T) {
 				},
 			},
 		},
-		"servers": []JSON{
+		Servers: []Server{
 			{
-				"url": "http://localhost:8080",
+				Url: "http://localhost:8080",
 			},
 		},
 	}
