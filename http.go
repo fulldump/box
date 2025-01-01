@@ -21,6 +21,14 @@ func handlerDoNothing(w http.ResponseWriter, r *http.Request) {
 	// do nothing
 }
 
+func DefaultHandlerResourceNotFound(ctx context.Context) {
+	SetError(ctx, ErrResourceNotFound)
+}
+
+func DefaultHandlerMethodNotAllowed(ctx context.Context) {
+	SetError(ctx, ErrMethodNotAllowed)
+}
+
 func Box2Http(b *B) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +43,7 @@ func Box2Http(b *B) http.Handler {
 		}
 		ctx = SetBoxContext(ctx, c)
 
-		var handler interface{} = handlerDoNothing
+		var handler any = handlerDoNothing
 
 		// Split url action
 		urlResource, urlAction := splitAction(r.URL.EscapedPath())
@@ -43,8 +51,7 @@ func Box2Http(b *B) http.Handler {
 		// Match resource
 		c.Resource = b.Match(urlResource, c.Parameters)
 		if nil == c.Resource {
-			SetError(ctx, ErrResourceNotFound)
-			//return
+			handler = b.HandleResourceNotFound
 		}
 
 		// Match action
@@ -54,8 +61,7 @@ func Box2Http(b *B) http.Handler {
 				c.Action = c.Resource.actionsByHttp[HttpMethodAny+" "]
 			}
 			if nil == c.Action {
-				SetError(ctx, ErrMethodNotAllowed)
-				//return
+				handler = b.HandleMethodNotAllowed
 			} else {
 				handler = c.Action.handler
 			}

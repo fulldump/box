@@ -9,7 +9,9 @@ import (
 type B struct {
 	// R is the root resource in box
 	*R
-	HttpHandler http.Handler
+	HttpHandler            http.Handler
+	HandleResourceNotFound any
+	HandleMethodNotAllowed any
 }
 
 func (b *B) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +20,9 @@ func (b *B) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func NewBox() *B {
 	b := &B{
-		R: NewResource(),
+		R:                      NewResource(),
+		HandleResourceNotFound: DefaultHandlerResourceNotFound,
+		HandleMethodNotAllowed: DefaultHandlerMethodNotAllowed,
 	}
 	b.HttpHandler = Box2Http(b)
 
