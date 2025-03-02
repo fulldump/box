@@ -18,7 +18,7 @@ var mockAccessLogPrintln = func(a ...interface{}) {
 	fmt.Println(a...)
 }
 
-func Example_Access_log_middleware() {
+func ExampleB_ServeHTTP_accessLogMiddleware() {
 
 	// Mock access log
 	box.DefaultAccessLogPrintln = mockAccessLogPrintln

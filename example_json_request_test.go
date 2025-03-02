@@ -24,7 +24,7 @@ type Article struct {
 	Created time.Time `json:"created"`
 }
 
-func Example_Json_request() {
+func ExampleB_ServeHTTP() {
 
 	b := box.NewBox()
 	b.Handle("POST", "/articles", func(input CreateArticleRequest) Article {

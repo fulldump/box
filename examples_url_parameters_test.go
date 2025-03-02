@@ -9,7 +9,7 @@ import (
 	"github.com/fulldump/box"
 )
 
-func Example_Url_parameters() {
+func ExampleB_ServeHTTP_urlParameters() {
 
 	b := box.NewBox()
 	b.Handle("GET", "/articles/{article-id}", func(w http.ResponseWriter, r *http.Request) string {

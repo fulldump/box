@@ -9,7 +9,7 @@ import (
 	"github.com/fulldump/box"
 )
 
-func Example_Getting_started() {
+func ExampleB_ServeHTTP_gettingStarted() {
 
 	b := box.NewBox()
 	b.HandleFunc("GET", "/hello", func(w http.ResponseWriter, r *http.Request) {

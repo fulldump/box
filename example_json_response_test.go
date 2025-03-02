@@ -14,7 +14,7 @@ type MyResponse struct {
 	Age  int
 }
 
-func Example_Json_responses() {
+func ExampleB_ServeHTTP_customInterceptor() {
 
 	b := box.NewBox()
 	b.Handle("GET", "/hello", func(w http.ResponseWriter, r *http.Request) MyResponse {

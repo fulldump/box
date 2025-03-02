@@ -10,7 +10,7 @@ import (
 	"github.com/fulldump/box"
 )
 
-func Example_Error_handling() {
+func ExampleBox2Http_errorHandling() {
 
 	b := box.NewBox()
 

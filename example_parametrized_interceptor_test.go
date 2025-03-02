@@ -8,7 +8,7 @@ import (
 	"github.com/fulldump/box"
 )
 
-func Example_ParametrizedInterceptor() {
+func ExampleB_ServeHTTP_parametrizedInterceptor() {
 
 	b := box.NewBox()
 

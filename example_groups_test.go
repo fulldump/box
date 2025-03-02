@@ -8,7 +8,7 @@ import (
 	"github.com/fulldump/box"
 )
 
-func Example_Groups() {
+func ExampleR_Group() {
 
 	b := box.NewBox()
 

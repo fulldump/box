@@ -19,7 +19,7 @@ func MyCustomInterceptor(next box.H) box.H {
 	}
 }
 
-func Example_CustomInterceptor() {
+func ExampleB_ServeHTTP_myCustomInterceptor() {
 
 	b := box.NewBox()
 
