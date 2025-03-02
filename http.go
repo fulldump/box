@@ -54,6 +54,8 @@ func Box2Http(b *B) http.Handler {
 			handler = b.HandleResourceNotFound
 		}
 
+		fillPathValues(c.Parameters, r)
+
 		// Match action
 		if c.Resource != nil {
 			c.Action = c.Resource.actionsByHttp[r.Method+" "+urlAction]
