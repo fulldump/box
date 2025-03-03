@@ -50,6 +50,13 @@ func Box2Http(b *B) http.Handler {
 
 		// Match resource
 		c.Resource = b.Match(urlResource, c.Parameters)
+		if nil != c.Resource && urlAction != "" {
+			if _, exist := c.Resource.actionsByName[urlAction]; !exist {
+				c.Parameters = map[string]string{}
+				urlResource, urlAction = r.URL.EscapedPath(), ""
+				c.Resource = b.Match(urlResource, c.Parameters)
+			}
+		}
 		if nil == c.Resource {
 			handler = b.HandleResourceNotFound
 		}
