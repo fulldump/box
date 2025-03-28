@@ -47,3 +47,36 @@ func TestBox2Http_ambiguousPathSemicolon(t *testing.T) {
 	})
 
 }
+
+func TestBox2Http_configurable404(t *testing.T) {
+
+	b := NewBox()
+	b.HandleResourceNotFound = func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("HEY! Not Found"))
+	}
+	s := httptest.NewServer(b)
+
+	res, _ := http.Get(s.URL + "/hello")
+	AssertEqual(t, res.StatusCode, 404)
+	body, _ := io.ReadAll(res.Body)
+	AssertEqual(t, string(body), "HEY! Not Found")
+
+}
+
+func TestBox2Http_configurable405(t *testing.T) {
+
+	b := NewBox()
+	b.HandleMethodNotAllowed = func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("HEY! Method Not Allowed"))
+	}
+	b.Handle("POST", "/hello", func(w http.ResponseWriter, r *http.Request) {})
+	s := httptest.NewServer(b)
+
+	res, _ := http.Get(s.URL + "/hello")
+	AssertEqual(t, res.StatusCode, 405)
+	body, _ := io.ReadAll(res.Body)
+	AssertEqual(t, string(body), "HEY! Method Not Allowed")
+
+}
