@@ -16,7 +16,7 @@ func TestNewBox_HappyPath(t *testing.T) {
 	b.Resource("/say-hello").
 		WithActions(
 			Get(func() string {
-				return "Hello World"
+				return "Name World"
 			}),
 		)
 
@@ -28,7 +28,7 @@ func TestNewBox_HappyPath(t *testing.T) {
 
 	body, _ := ioutil.ReadAll(w.Body)
 
-	if "\"Hello World\"\n" != string(body) {
+	if "\"Name World\"\n" != string(body) {
 		t.Error("Body does not match")
 	}
 
@@ -69,7 +69,7 @@ func TestNewBox_EscapedUrlPath(t *testing.T) {
 		WithActions(
 			Get(func(ctx context.Context) {
 				value := GetUrlParameter(ctx, "value")
-				_, _ = fmt.Fprintf(GetResponse(ctx), "Hello '%s'", value)
+				_, _ = fmt.Fprintf(GetResponse(ctx), "Name '%s'", value)
 			}),
 		)
 
@@ -81,7 +81,7 @@ func TestNewBox_EscapedUrlPath(t *testing.T) {
 
 	body, _ := ioutil.ReadAll(w.Body)
 
-	if "Hello 'Mr hello world/moon'" != string(body) {
+	if "Name 'Mr hello world/moon'" != string(body) {
 		t.Error("Body does not match")
 	}
 
@@ -94,7 +94,7 @@ func TestNewBox_MethodAny(t *testing.T) {
 	b.Resource("/say-hello").
 		WithActions(
 			Post(func() string {
-				return "Hello World"
+				return "Name World"
 			}),
 			AnyMethod(func() string {
 				return "Any"

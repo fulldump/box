@@ -1,7 +1,9 @@
 package box
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 )
@@ -12,6 +14,8 @@ type B struct {
 	HttpHandler            http.Handler
 	HandleResourceNotFound any
 	HandleMethodNotAllowed any
+	Deserializer           func(ctx context.Context, r io.Reader, v interface{}) error
+	Serializer             func(ctx context.Context, w io.Writer, v interface{}) error
 }
 
 func (b *B) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -23,6 +27,8 @@ func NewBox() *B {
 		R:                      NewResource(),
 		HandleResourceNotFound: DefaultHandlerResourceNotFound,
 		HandleMethodNotAllowed: DefaultHandlerMethodNotAllowed,
+		Serializer:             DefaultSerialize,
+		Deserializer:           DefaultDeserialize,
 	}
 	b.HttpHandler = Box2Http(b)
 
