@@ -172,3 +172,33 @@ func TestBox2Http_customDeserializer(t *testing.T) {
 	})
 
 }
+
+func TestBox2Http_customDeserializer_emptyResponse(t *testing.T) {
+
+	b := NewBox()
+	b.Serializer = func(ctx context.Context, w io.Writer, v interface{}) error {
+		resp := GetResponse(ctx)
+		if v == nil {
+			resp.WriteHeader(http.StatusNoContent)
+			return nil
+		}
+
+		resp.WriteHeader(http.StatusFound)
+		return nil
+	}
+	type MyResponse struct {
+		Name string `json:"name"`
+	}
+	b.Handle("GET", "/hello", func(w http.ResponseWriter, r *http.Request) *MyResponse {
+		w.Header().Set("My-Header", "My value")
+		return nil
+	})
+	s := httptest.NewServer(b)
+
+	res, _ := http.Get(s.URL + "/hello")
+	AssertEqual(t, res.StatusCode, http.StatusNoContent)
+	AssertEqual(t, res.Header.Get("My-Header"), "My value")
+	body, _ := io.ReadAll(res.Body)
+	AssertEqual(t, string(body), "")
+
+}

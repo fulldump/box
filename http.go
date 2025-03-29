@@ -35,6 +35,10 @@ func DefaultDeserialize(ctx context.Context, r io.Reader, v interface{}) error {
 
 func DefaultSerialize(ctx context.Context, w io.Writer, v interface{}) error {
 	resp := GetBoxContext(ctx).Response
+	if v == nil {
+		resp.WriteHeader(http.StatusNoContent)
+		return nil
+	}
 	resp.Header().Set("Content-Type", "application/json")
 	return json.NewEncoder(w).Encode(v)
 }
@@ -192,8 +196,7 @@ func Box2Http(b *B) http.Handler {
 				}
 
 				if isNil(genericResponse) {
-					// TODO: write empty response
-					return
+					genericResponse = nil
 				}
 
 				err := b.Serializer(ctx, c.Response, genericResponse)
