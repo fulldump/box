@@ -22,15 +22,26 @@ func newApiExample() *box.B {
 	b.Handle("GET", "/scalarValues", GetScalarValues)
 	b.Handle("GET", "/time.Time", GetTypeTime)
 
+	b.Handle("GET", "/hidden-action", func() {}).SetAttribute("openapi", false)
+
+	b.Group("/hidden-resource").SetAttribute("openapi", false)
+	b.Handle("GET", "/hidden-resource", func() {})
+
 	return b
 }
 
 type User struct {
 	Id     string   `json:"id" description:"User identifier"`
 	Name   string   `json:"name" description:"User name"`
-	Tags   []string `json:"tags" description:"User tags"`
+	Tags   []string `json:"tags,omitempty" description:"User tags"`
 	Age    int      `json:"age" description:"User age"`
 	Active bool     `json:"active" description:"User active"`
+	AnonymousFields
+}
+
+type AnonymousFields struct {
+	CreationDate time.Time `json:"creation_date" description:"Creation date"`
+	ModifiedDate time.Time `json:"modifiedd_date" description:"Modification date"`
 }
 
 func ListUsers() []*User {
@@ -234,6 +245,22 @@ func TestOpenApi(t *testing.T) {
 								"type": "string",
 							},
 							"type": "array",
+						},
+						"creation_date": JSON{
+							"description": "Creation date",
+							"examples": []string{
+								"2006-01-02T15:04:05Z07:00",
+							},
+							"format": "date-time",
+							"type":   "string",
+						},
+						"modifiedd_date": JSON{
+							"description": "Modification date",
+							"examples": []string{
+								"2006-01-02T15:04:05Z07:00",
+							},
+							"format": "date-time",
+							"type":   "string",
 						},
 					},
 					"required": []JSON{},
