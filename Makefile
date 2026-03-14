@@ -2,7 +2,7 @@ PROJECT = github.com/fulldump/box
 
 GOCMD=go
 
-.PHONY: all setup test coverage example
+.PHONY: all setup test coverage example benchmark
 
 all: info test
 
@@ -24,6 +24,9 @@ example:
 coverage:
 	$(GOCMD) test $(PROJECT)/... -cover -covermode=count -coverprofile=coverage.out; \
 	$(GOCMD) tool cover -html=coverage.out
+
+benchmark:
+	cd benchmarks && $(GOCMD) test -run '^$$' -bench '^BenchmarkRouters$$' -benchmem
 
 version:
 	@git describe --tags --always --long

@@ -152,7 +152,19 @@ b.Handle(http.MethodGet, "/openapi.json", func() any {
 
 - Project docs: `docs/`
 - Publishable website: `website/`
+- Benchmark suite: `benchmarks/`
 - Examples in tests: `example_*_test.go`, `examples_*_test.go`
+
+## Benchmarks
+
+Run the comparative benchmark suite against `box`, `gin`, `chi`, and `echo`:
+
+```bash
+cd benchmarks
+go test -run '^$' -bench '^BenchmarkRouters$' -benchmem
+```
+
+Latest baseline and methodology are published in `docs/benchmarks.md`.
 
 ## Stability and compatibility
 
@@ -170,7 +182,7 @@ Contributions are welcome. Please read:
 
 ## Roadmap
 
-- Performance benchmarks against popular routers.
+- Close benchmark performance gap with gin/chi/echo while preserving API ergonomics.
 - More first-party interceptors (auth, rate-limiting, observability).
 - Improved OpenAPI customization hooks.
 - Extra guides and production deployment recipes.
