@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>box docs</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-a"></div>
+    <div class="bg-glow bg-glow-b"></div>
+
+    <header class="container nav">
+      <a href="index.html" class="brand">box</a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="https://github.com/fulldump/box">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="container docs-page">
+      <h1>Documentation</h1>
+      <p>Core guides for building and operating APIs with `box`.</p>
+
+      <div class="docs-grid">
+        <a class="doc-card" href="https://github.com/fulldump/box/blob/master/docs/getting-started.md">
+          <h2>Getting Started</h2>
+          <p>Install, bootstrap and first typed handlers.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/fulldump/box/blob/master/docs/routing.md">
+          <h2>Routing</h2>
+          <p>Paths, params, method matching and route groups.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/fulldump/box/blob/master/docs/middleware.md">
+          <h2>Middleware</h2>
+          <p>Interceptor model, composition, and context helpers.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/fulldump/box/blob/master/docs/websockets.md">
+          <h2>WebSockets</h2>
+          <p>Upgrade routes, custom policies and production notes.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/fulldump/box/blob/master/docs/openapi.md">
+          <h2>OpenAPI</h2>
+          <p>Generate schemas from your existing route definitions.</p>
+        </a>
+        <a class="doc-card" href="https://github.com/fulldump/box/blob/master/docs/production-checklist.md">
+          <h2>Production Checklist</h2>
+          <p>Operational recommendations before shipping to prod.</p>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

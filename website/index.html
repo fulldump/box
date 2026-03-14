@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>box | HTTP router for Go</title>
+    <meta
+      name="description"
+      content="box is a typed, composable HTTP router for Go with middleware, OpenAPI generation and WebSocket support."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-a"></div>
+    <div class="bg-glow bg-glow-b"></div>
+
+    <header class="container nav">
+      <a href="index.html" class="brand">box</a>
+      <nav>
+        <a href="docs.html">Docs</a>
+        <a href="https://github.com/fulldump/box">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="container hero">
+      <p class="kicker">Go HTTP Router</p>
+      <h1>Build clean APIs fast with typed handlers and zero ceremony.</h1>
+      <p class="lead">
+        `box` gives you an ergonomic router with route groups, composable
+        interceptors, automatic JSON flow, OpenAPI generation and first-class
+        WebSocket routes.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="docs.html">Read Documentation</a>
+        <a class="btn btn-secondary" href="https://pkg.go.dev/github.com/fulldump/box">Go Reference</a>
+      </div>
+      <pre class="code"><code>go get github.com/fulldump/box</code></pre>
+    </main>
+
+    <section class="container features">
+      <article class="card">
+        <h2>Typed by default</h2>
+        <p>Use Go structs directly in handlers for request and response payloads.</p>
+      </article>
+      <article class="card">
+        <h2>Composable middleware</h2>
+        <p>Attach interceptors globally, per group, or per route with predictable ordering.</p>
+      </article>
+      <article class="card">
+        <h2>WebSocket ready</h2>
+        <p>Create upgrade routes with `HandleWebSocket` and custom upgrade policies.</p>
+      </article>
+      <article class="card">
+        <h2>OpenAPI support</h2>
+        <p>Generate and publish API specs directly from the routes you define.</p>
+      </article>
+    </section>
+
+    <section class="container snippet">
+      <h2>Quick Example</h2>
+      <pre class="code"><code>package main
+
+import (
+  "net/http"
+  "github.com/fulldump/box"
+)
+
+func main() {
+  b := box.NewBox()
+  b.Handle(http.MethodGet, "/hello/{name}", func(r *http.Request) map[string]string {
+    return map[string]string{"message": "hello " + r.PathValue("name")}
+  })
+  _ = b.ListenAndServe()
+}</code></pre>
+    </section>
+
+    <footer class="container footer">
+      <span>MIT License</span>
+      <span>Made for production-grade Go services</span>
+    </footer>
+  </body>
+</html>

@@ -1,67 +1,82 @@
-# Box
-<img src="logo.png">
+# box
 
 <p align="center">
-<a href="https://app.travis-ci.com/fulldump/box" rel="nofollow"><img src="https://app.travis-ci.com/fulldump/box.svg?branch=master" alt="Build Status"></a>
-<a href="https://goreportcard.com/report/github.com/fulldump/box"><img src="https://goreportcard.com/badge/github.com/fulldump/box"></a>
-<a href="https://godoc.org/github.com/fulldump/box"><img src="https://godoc.org/github.com/fulldump/box?status.svg" alt="GoDoc"></a>
-<img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/fulldump/box?sort=semver">
+  <img src="logo.png" alt="box logo" width="220" />
 </p>
 
-Box is an HTTP router to speed up development. Box supports URL parameters, interceptors, magic handlers
-and introspection documentation.
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/fulldump/box"><img src="https://pkg.go.dev/badge/github.com/fulldump/box.svg" alt="Go Reference"></a>
+  <a href="https://goreportcard.com/report/github.com/fulldump/box"><img src="https://goreportcard.com/badge/github.com/fulldump/box" alt="Go Report Card"></a>
+  <a href="https://github.com/fulldump/box/actions/workflows/ci.yml"><img src="https://github.com/fulldump/box/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+</p>
 
-<!-- TOC -->
-* [Box](#box)
-  * [Getting started](#getting-started)
-  * [Sending JSON](#sending-json)
-  * [URL parameters](#url-parameters)
-  * [Receiving and sending JSON](#receiving-and-sending-json)
-  * [Use interceptors](#use-interceptors)
-  * [Error handling](#error-handling)
-  * [Groups](#groups)
-  * [Custom interceptors](#custom-interceptors)
-  * [Parametrized interceptors](#parametrized-interceptors)
-<!-- TOC -->
+`box` is a fast, typed HTTP router for Go with clean middleware composition,
+automatic JSON handling, and built-in OpenAPI generation.
 
+It is already battle-tested in production-like environments and now aims to be
+the most ergonomic open-source router for teams that care about productivity
+without losing control.
 
-## Getting started
+## Why box
+
+- Typed handlers: receive typed request bodies and return typed responses.
+- Familiar API: still works with standard `http.HandlerFunc` handlers.
+- Composable middleware: global, group, and route-level interceptors.
+- URL params and route groups: ergonomic API design for real services.
+- Built-in OpenAPI generation: publish docs from existing route definitions.
+- WebSocket support: native route helper based on the same router tree.
+
+## Install
+
+```bash
+go get github.com/fulldump/box
+```
+
+## Quickstart
 
 ```go
 package main
 
 import (
+	"net/http"
+
 	"github.com/fulldump/box"
 )
 
 func main() {
+	b := box.NewBox()
 
-    b := box.NewBox()
+	b.HandleFunc(http.MethodGet, "/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.Write([]byte("ok"))
+	})
 
-    b.HandleFunc("GET", "/hello", func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("World!"))
-    })
-
-    b.ListenAndServe() // listening at http://localhost:8080
-
+	_ = b.ListenAndServe() // http://localhost:8080
 }
 ```
 
-## Sending JSON
+## Typed JSON handlers
 
 ```go
-b := box.NewBox()
-
-type MyResponse struct {
-    Name string
-    Age  int
+type CreateArticleRequest struct {
+	Title string `json:"title"`
+	Text  string `json:"text"`
 }
 
-b.Handle("GET", "/hello", func(w http.ResponseWriter, r *http.Request) MyResponse {
-    return MyResponse{
-        Name: "Fulanez",
-        Age:  33,
-    }
+type Article struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	Text  string `json:"text"`
+}
+
+b := box.NewBox()
+
+b.Handle(http.MethodPost, "/articles", func(input CreateArticleRequest) (Article, error) {
+	return Article{
+		ID:    "a-1",
+		Title: input.Title,
+		Text:  input.Text,
+	}, nil
 })
 ```
 
@@ -70,187 +85,96 @@ b.Handle("GET", "/hello", func(w http.ResponseWriter, r *http.Request) MyRespons
 ```go
 b := box.NewBox()
 
-b.Handle("GET", "/articles/{article-id}", func(w http.ResponseWriter, r *http.Request) string {
-    articleID := r.PathValue("article-id")
-    return "ArticleID is " + articleID
+b.Handle(http.MethodGet, "/articles/{article-id}", func(r *http.Request) string {
+	articleID := r.PathValue("article-id") // Go >= 1.22
+	return "article " + articleID
 })
+
+// Go < 1.22
+// articleID := box.Param(r, "article-id")
 ```
 
-Or before go 1.22:
-
-```go
-    articleID := box.Param(r, "article-id")
-```
-
-## Receiving and sending JSON
-
-```go
-type CreateArticleRequest struct {
-    Title string
-    Text  string
-}
-
-type Article struct {
-    Id      string    `json:"id"`
-    Title   string    `json:"title"`
-    Text    string    `json:"text"`
-    Created time.Time `json:"created"`
-}
-
-b := box.NewBox()
-b.Handle("POST", "/articles", func(input CreateArticleRequest) Article {
-    fmt.Println("Persist new article...", input)
-    return Article{
-        Id:      "my-new-id",
-        Title:   input.Title,
-        Text:    input.Text,
-        Created: time.Unix(1674762079, 0),
-    }
-})
-```
-
-## Use interceptors
-
-Interceptors, also known as middlewares, are pieces of code that are executed
-in order before the handler to provide common functionality:
-
-* Do things before and/or after the handler execution
-* Cut the execution and stop executing the rest of interceptors and handler
-* Inject items into the context
-
-```go
-func ListArticles()   { /* ... */ }
-func CreateArticles() { /* ... */ }
-func GetArticle()     { /* ... */ }
-func DeleteArticle()  { /* ... */ }
-
-func main() {
-    b := box.NewBox()
-
-    b.Use(box.AccessLog)   // use middlewares to print logs
-    b.Use(box.PrettyError) // use middlewares return pretty errors
-
-    b.Handle("GET", "/articles", ListArticles)
-    b.Handle("POST", "/articles", CreateArticles)
-    b.Handle("GET", "/articles/{article-id}", GetArticle)
-    b.Handle("DELETE", "/articles/{article-id}", DeleteArticle)
-}
-```
-
-## Error handling
-
-```go
-b := box.NewBox()
-b.Use(box.PrettyError)
-b.Handle("GET", "/articles", func() (*Article, error) {
-    return nil, errors.New("could not connect to the database")
-})
-go b.ListenAndServe()
-
-resp, _ := http.Get(s.URL + "/articles")
-io.Copy(os.Stdout, resp.Body) // could not connect to the database
-```
-
-## Groups
-
-Groups are a neat way to organize and compose big APIs and also to limit the scope
-of interceptors.
+## Interceptors (middlewares)
 
 ```go
 b := box.NewBox()
 
-v0 := b.Group("/v0")
-v0.Use(box.SetResponseHeader("Content-Type", "application/json"))
+b.Use(box.AccessLog, box.PrettyError)
 
-v0.Handle("GET", "/articles", ListArticles)
-v0.Handle("POST", "/articles", CreateArticle)
+api := b.Group("/api")
+api.Use(box.SetResponseHeader("X-Service", "articles"))
+
+api.Handle(http.MethodGet, "/articles", func() []string {
+	return []string{"a-1", "a-2"}
+})
 ```
 
-## Custom interceptors
-
-Interceptors are very useful to reuse logic in a very convenient and modular way.
-
-Here is a sample interceptor that does nothing:
+## WebSocket routes
 
 ```go
-func MyCustomInterceptor(next box.H) box.H {
-	return func(ctx context.Context) {
-        // do something before the handler
-		next(ctx) // continue the flow
-		// do something after the handler
-	}
-}
-```
+import (
+	"context"
 
-The following interceptor returns a `Server` header:
+	"github.com/gorilla/websocket"
+)
 
-```go
-func MyCustomInterceptor(next box.H) box.H {
-	return func(ctx context.Context) {
-		w := box.GetResponse(ctx)
-		w.Header().Set("Server", "MyServer")
-		next(ctx) // continue the flow
-	}
-}
+b := box.NewBox()
 
-func main() {
-
-	b := box.NewBox()
-	b.Use(MyCustomInterceptor)
-
-}
-```
-
-## Parametrized interceptors
-
-Sometimes interceptors can be generalized to cover a wider set of use cases. For
-example, the following interceptor can set any response header and can be used
-multiple times.
-
-```go
-func SetResponseHeader(key, value string) box.I {
-	return func(next box.H) box.H {
-		return func(ctx context.Context) {
-			box.GetResponse(ctx).Header().Set(key, value)
-			next(ctx)
+b.HandleWebSocket("/ws/echo", func(_ context.Context, conn *websocket.Conn) {
+	for {
+		messageType, payload, err := conn.ReadMessage()
+		if err != nil {
+			return
 		}
+		_ = conn.WriteMessage(messageType, payload)
 	}
-}
-
-func main() {
-    b := box.NewBox()
-    b.Use(
-        box.SetResponseHeader("Server", "My server name"),
-        box.SetResponseHeader("Version", "v3.2.1"),
-    )
-}
+})
 ```
 
-## Generate OpenAPI from your API
+You can also provide custom `box.WebSocketOptions` with your own `websocket.Upgrader`
+and error strategy.
 
-Leverage all the API information you have already defined with Box
-to generate your OpenAPI specification, including your types.
-
-Just use the function `boxopenapi.Spec` and publish your spec:
+## OpenAPI generation
 
 ```go
+import "github.com/fulldump/box/boxopenapi"
 
-func main() {
-	b := box.NewBox()
-	// ... define all your handlers
+spec := boxopenapi.Spec(b)
+spec.Info.Title = "Articles API"
+spec.Info.Version = "1.0.0"
 
-	spec := boxopenapi.Spec(b)
-	spec.Info.Title = "My service"
-	spec.Info.Version = "1.0"
-	spec.Servers = []boxopenapi.Server{
-		{
-			Url: "http://localhost:8080",
-		},
-	}
-
-	b.Handle("GET", "/openapi.json", func() any {
-		return spec
-	})
-}
-
+b.Handle(http.MethodGet, "/openapi.json", func() any {
+	return spec
+})
 ```
+
+## Documentation
+
+- Project docs: `docs/`
+- Publishable website: `website/`
+- Examples in tests: `example_*_test.go`, `examples_*_test.go`
+
+## Stability and compatibility
+
+- Go module: `github.com/fulldump/box`
+- Current minimum Go version: `1.19`
+- Follows semantic versioning for public APIs
+
+## Contributing
+
+Contributions are welcome. Please read:
+
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `SECURITY.md`
+
+## Roadmap
+
+- Performance benchmarks against popular routers.
+- More first-party interceptors (auth, rate-limiting, observability).
+- Improved OpenAPI customization hooks.
+- Extra guides and production deployment recipes.
+
+## License
+
+MIT. See `LICENSE`.
